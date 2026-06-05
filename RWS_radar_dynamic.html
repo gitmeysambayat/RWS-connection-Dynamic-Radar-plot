@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Radar grading, outward = good (fixed global ranges)</title>
+  <title>Radar grading, outward = better (fixed global ranges)</title>
   <link rel="icon" type="image/png" href="favicon_3dmbc.png">
   <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
@@ -33,6 +33,9 @@
     .brandBox .labBrand{ height:40px; }
     .pageShell{ padding:8px 10px; }
     .topbar { display:flex; gap:8px 12px; align-items:center; flex-wrap:wrap; margin:0 0 8px; }
+    .topbar > div{ display:flex; align-items:center; gap:6px; }
+    .topbar label{ white-space:nowrap; }
+    .criteriaControl label{ font-size:12px; }
     label{ font-weight:600; }
     select, input, button{
       border:1px solid var(--line);
@@ -97,7 +100,7 @@
   <div class="headerRow">
     <div class="titleWrap">
       <div class="title" id="pageTitle">Reduced Web Section radar explorer</div>
-      <div class="metaLine" id="datasetSummary">Radar grading, outward = good. Loading model database...</div>
+      <div class="metaLine" id="datasetSummary">Radar grading, outward = better. Loading model database...</div>
     </div>
     <div class="brandBox" aria-label="Laboratory and institutional logos">
       <img class="labBrand" src="3DMBC_logo.png" alt="3DMBC logo">
@@ -119,6 +122,13 @@
   <div>
     <label>Span-to-depth:</label>
     <select id="s2dSel"><option value="All">All</option></select>
+  </div>
+  <div class="criteriaControl">
+    <label for="aiscCriteriaSel">Meet AISC 341-16 criteria (<i>M</i><sub>0.04</sub>/<i>M</i><sub>p</sub> &ge; 0.8)?</label>
+    <select id="aiscCriteriaSel">
+      <option value="Any">Doesn't matter</option>
+      <option value="Yes">Yes</option>
+    </select>
   </div>
   <div>
     <label>Top-N:</label>
@@ -169,6 +179,7 @@ function invNormOutward(radius, lo, hi, best_low) {
 const profSel = document.getElementById('profileSel');
 const gradeSel = document.getElementById('gradeSel');
 const s2dSel = document.getElementById('s2dSel');
+const aiscCriteriaSel = document.getElementById('aiscCriteriaSel');
 const pageTitle = document.getElementById('pageTitle');
 const datasetSummary = document.getElementById('datasetSummary');
 const s2dValues = [...new Set(DATA.rows.map(row => String(row.S2D)))].sort((a,b) => Number(a) - Number(b));
@@ -176,7 +187,7 @@ for (const p of DATA.profiles) { const o=document.createElement('option'); o.val
 for (const g of DATA.grades)   { const o=document.createElement('option'); o.value=g; o.textContent=g; gradeSel.appendChild(o); }
 for (const s of s2dValues)      { const o=document.createElement('option'); o.value=s; o.textContent=s; s2dSel.appendChild(o); }
 pageTitle.textContent = `Reduced Web Section radar explorer (${DATA.rows.length} models)`;
-datasetSummary.textContent = `${DATA.rows.length} reduced web section models are in the full database; the live counter reports the filtered radar subset. Filters cover ${DATA.profiles.length} profiles, ${DATA.grades.length} steel grades, and ${s2dValues.length} span-to-depth ratios.`;
+datasetSummary.textContent = `${DATA.rows.length} reduced web section models are in the full database; outward means better performance on the radar scale, and the live counter reports the filtered radar subset.`;
 
 // PRIMARY filters
 const primaryDiv = document.getElementById('primaryFilters');
@@ -261,6 +272,7 @@ for (const f of DATA.other_numeric) {
   moreNumeric[f.col] = { slider, loNum, hiNum };
 }
 for (const f of DATA.other_cats) {
+  if (f.col === 'QualPass_vs_Mp') continue;
   const sid = safeId(f.col);
   const card = document.createElement('div');
   card.className = 'ctrl';
@@ -281,12 +293,14 @@ const countSpan = document.getElementById('count');
 profSel.addEventListener('change', draw);
 gradeSel.addEventListener('change', draw);
 s2dSel.addEventListener('change', draw);
+aiscCriteriaSel.addEventListener('change', draw);
 
 // Main render
 function draw() {
   const prof = profSel.value;
   const grad = gradeSel.value;
   const s2d = s2dSel.value;
+  const aiscCriteria = aiscCriteriaSel.value;
   const topN = Math.max(1, Math.floor(parseFloat(topnEl.value)||1));
 
   // WINDOWS: fixed to GLOBAL min–max
@@ -322,6 +336,7 @@ function draw() {
     if (prof !== 'All' && String(row.Profile) !== prof) continue;
     if (grad !== 'All' && String(row.Grade)   !== grad) continue;
     if (s2d !== 'All' && String(row.S2D)      !== s2d) continue;
+    if (aiscCriteria === 'Yes' && String(row.QualPass_vs_Mp) !== 'OK') continue;
 
     // categorical
     let ok = true;
@@ -417,7 +432,7 @@ function draw() {
   };
 
   const layout = {
-    title: `Radar grading, outward = good (Profile=${prof}, Grade=${grad}, S/d=${s2d}, N=${topN})`,
+    title: `Radar grading, outward = better (Profile=${prof}, Grade=${grad}, S/d=${s2d}, N=${topN})`,
     polar: {
       radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
                     gridcolor: '#e2e8f0', linecolor: '#cbd5e1' },
