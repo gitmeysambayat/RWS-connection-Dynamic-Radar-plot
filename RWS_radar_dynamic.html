@@ -121,6 +121,7 @@
     <input id="topn" type="number" min="1" step="1" value="10" style="width:80px"/>
   </div>
   <button id="downloadBtn">Download Filtered CSV</button>
+  <button id="clearRadarBtn" type="button">Clear radar plot</button>
   <div class="small"><span id="count" class="badge"></span></div>
 </div>
 
@@ -416,6 +417,21 @@ function draw() {
   Plotly.react('fig', [...modelTraces, ringTrace], layout, {responsive:true, displayModeBar:true});
 }
 
+function clearRadarPlot() {
+  const layout = {
+    title: 'Radar plot cleared',
+    polar: {
+      radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
+                    gridcolor: '#e2e8f0', linecolor: '#cbd5e1' },
+      angularaxis: { direction: 'counterclockwise', showline: true,
+                     linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
+    },
+    legend: {orientation:'h', y:-0.12},
+    margin: {l:60, r:60, t:60, b:90}
+  };
+  Plotly.react('fig', [], layout, {responsive:true, displayModeBar:true});
+}
+
 // CSV download: summary -> blank -> full original row; UTF-8 BOM
 function downloadCSV(filtered) {
   if (!filtered || filtered.length === 0) { alert("No filtered models to download."); return; }
@@ -452,6 +468,8 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
   if (pw !== DOWNLOAD_PASSWORD) { alert("Incorrect password."); return; }
   downloadCSV(window._lastFilteredModels);
 });
+
+document.getElementById("clearRadarBtn").addEventListener("click", clearRadarPlot);
 
 draw();
 </script>
