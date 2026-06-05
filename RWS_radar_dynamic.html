@@ -174,27 +174,6 @@ function invNormOutward(radius, lo, hi, best_low) {
   if (best_low) return lo + (1 - radius)*(hi - lo);
   return lo + radius*(hi - lo);
 }
-function radarAxisTitleAnnotations() {
-  const positions = [
-    {x: 0.945, y: 0.50, xanchor: 'left', yanchor: 'middle'},
-    {x: 0.735, y: 0.905, xanchor: 'center', yanchor: 'bottom'},
-    {x: 0.265, y: 0.905, xanchor: 'center', yanchor: 'bottom'},
-    {x: 0.055, y: 0.50, xanchor: 'right', yanchor: 'middle'},
-    {x: 0.265, y: 0.095, xanchor: 'center', yanchor: 'top'},
-    {x: 0.735, y: 0.095, xanchor: 'center', yanchor: 'top'}
-  ];
-  return DATA.spokes.map((label, i) => ({
-    xref: 'paper',
-    yref: 'paper',
-    x: positions[i].x,
-    y: positions[i].y,
-    xanchor: positions[i].xanchor,
-    yanchor: positions[i].yanchor,
-    text: label,
-    showarrow: false,
-    font: {size: 16, color: '#334155', family: 'Arial, sans-serif'}
-  }));
-}
 
 // Populate dropdowns
 const profSel = document.getElementById('profileSel');
@@ -414,7 +393,7 @@ function draw() {
   for (const m of DATA.metrics) {
     const st = DATA.stats[m.label];
     for (const r of radii) {
-      labelR.push(r);
+      labelR.push(r === 1 ? 0.90 : (r === 0 ? 0.08 : r));
       labelT.push(m.label);
       labelText.push(invNormOutward(r, st.min, st.max, m.best_low).toFixed(4));
     }
@@ -455,15 +434,15 @@ function draw() {
   const layout = {
     title: `Radar grading, outward = better (Profile=${prof}, Grade=${grad}, S/d=${s2d}, N=${topN})`,
     polar: {
-      domain: {x: [0.10, 0.90], y: [0.10, 0.90]},
+      domain: {x: [0.07, 0.93], y: [0.07, 0.93]},
       radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
                     gridcolor: '#e2e8f0', linecolor: '#cbd5e1' },
       angularaxis: { direction: 'counterclockwise', showline: true,
-                     showticklabels: false, linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
+                     showticklabels: true, tickfont: {size: 16, color: '#334155', family: 'Arial, sans-serif'},
+                     linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
     },
     legend: {orientation:'h', y:-0.12},
-    annotations: radarAxisTitleAnnotations(),
-    margin: {l:92, r:92, t:74, b:104}
+    margin: {l:76, r:76, t:70, b:98}
   };
 
   Plotly.react('fig', [...modelTraces, ringTrace], layout, {responsive:true, displayModeBar:true});
@@ -473,15 +452,15 @@ function clearRadarPlot() {
   const layout = {
     title: 'Radar plot cleared',
     polar: {
-      domain: {x: [0.10, 0.90], y: [0.10, 0.90]},
+      domain: {x: [0.07, 0.93], y: [0.07, 0.93]},
       radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
                     gridcolor: '#e2e8f0', linecolor: '#cbd5e1' },
       angularaxis: { direction: 'counterclockwise', showline: true,
-                     showticklabels: false, linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
+                     showticklabels: true, tickfont: {size: 16, color: '#334155', family: 'Arial, sans-serif'},
+                     linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
     },
     legend: {orientation:'h', y:-0.12},
-    annotations: radarAxisTitleAnnotations(),
-    margin: {l:92, r:92, t:74, b:104}
+    margin: {l:76, r:76, t:70, b:98}
   };
   Plotly.react('fig', [], layout, {responsive:true, displayModeBar:true});
 }
