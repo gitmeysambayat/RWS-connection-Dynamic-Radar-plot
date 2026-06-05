@@ -175,6 +175,32 @@ function invNormOutward(radius, lo, hi, best_low) {
   return lo + radius*(hi - lo);
 }
 
+const RADAR_AXIS_LABELS = {
+  'PEEQ@CF': 'PEEQ at<br>column face',
+  'Von Mises@CF': 'Normalised von Mises<br>at column face',
+  'Energy': 'Normalised<br>dissipated energy',
+  'Degradation': 'Strength degradation<br>at 0.06 rad',
+  'θ(0.6)': 'M<sub>0.06</sub>/M<sub>0.06,FS</sub>',
+  'Mc': 'M<sub>c</sub>/M<sub>c,FS</sub>'
+};
+
+const RADAR_HOVER_LABELS = {
+  'PEEQ@CF': 'PEEQ at column face',
+  'Von Mises@CF': 'Normalised von Mises at column face',
+  'Energy': 'Normalised dissipated energy',
+  'Degradation': 'Strength degradation at 0.06 rad, (Mc - M0.06) / Mc',
+  'θ(0.6)': 'M0.06 / M0.06,FS',
+  'Mc': 'Mc / Mc,FS'
+};
+
+function axisLabel(label) {
+  return RADAR_AXIS_LABELS[label] || label;
+}
+
+function hoverLabel(label) {
+  return RADAR_HOVER_LABELS[label] || label;
+}
+
 // Populate dropdowns
 const profSel = document.getElementById('profileSel');
 const gradeSel = document.getElementById('gradeSel');
@@ -369,7 +395,7 @@ function draw() {
       const v = row[m.label];
       const w = windows[m.label];
       rads.push( normOutward(v, w.lo, w.hi, w.best_low) );
-      hoverLines.push(`${m.label}: ${Number(v).toFixed(5)}`);
+      hoverLines.push(`${hoverLabel(m.label)}: ${Number(v).toFixed(5)}`);
     }
 
     // polygon area
@@ -394,12 +420,13 @@ function draw() {
     const st = DATA.stats[m.label];
     for (const r of radii) {
       labelR.push(r === 1 ? 0.90 : (r === 0 ? 0.08 : r));
-      labelT.push(m.label);
+      labelT.push(axisLabel(m.label));
       labelText.push(invNormOutward(r, st.min, st.max, m.best_low).toFixed(4));
     }
   }
 
-  const theta = [...DATA.spokes, DATA.spokes[0]];
+  const axisTheta = DATA.metrics.map(m => axisLabel(m.label));
+  const theta = [...axisTheta, axisTheta[0]];
   const modelTraces = subset.map(k => {
     const rr = [...k.rads, k.rads[0]];
     const hv = [...k.hoverLines, k.hoverLines[0]];
