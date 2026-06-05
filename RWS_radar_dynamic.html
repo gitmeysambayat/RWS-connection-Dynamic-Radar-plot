@@ -168,11 +168,32 @@ function normOutward(val, lo, hi, best_low) {
   val = Math.max(Math.min(val, hi), lo);
   if (hi <= lo) return 0.0;
   const t = (val - lo) / (hi - lo);
-  return best_low ? (1 - t) : t; // outward = good
+  return best_low ? (1 - t) : t; // outward = better
 }
 function invNormOutward(radius, lo, hi, best_low) {
   if (best_low) return lo + (1 - radius)*(hi - lo);
   return lo + radius*(hi - lo);
+}
+function radarAxisTitleAnnotations() {
+  const positions = [
+    {x: 0.945, y: 0.50, xanchor: 'left', yanchor: 'middle'},
+    {x: 0.735, y: 0.905, xanchor: 'center', yanchor: 'bottom'},
+    {x: 0.265, y: 0.905, xanchor: 'center', yanchor: 'bottom'},
+    {x: 0.055, y: 0.50, xanchor: 'right', yanchor: 'middle'},
+    {x: 0.265, y: 0.095, xanchor: 'center', yanchor: 'top'},
+    {x: 0.735, y: 0.095, xanchor: 'center', yanchor: 'top'}
+  ];
+  return DATA.spokes.map((label, i) => ({
+    xref: 'paper',
+    yref: 'paper',
+    x: positions[i].x,
+    y: positions[i].y,
+    xanchor: positions[i].xanchor,
+    yanchor: positions[i].yanchor,
+    text: label,
+    showarrow: false,
+    font: {size: 16, color: '#334155', family: 'Arial, sans-serif'}
+  }));
 }
 
 // Populate dropdowns
@@ -434,13 +455,15 @@ function draw() {
   const layout = {
     title: `Radar grading, outward = better (Profile=${prof}, Grade=${grad}, S/d=${s2d}, N=${topN})`,
     polar: {
+      domain: {x: [0.10, 0.90], y: [0.10, 0.90]},
       radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
                     gridcolor: '#e2e8f0', linecolor: '#cbd5e1' },
       angularaxis: { direction: 'counterclockwise', showline: true,
-                     linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
+                     showticklabels: false, linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
     },
     legend: {orientation:'h', y:-0.12},
-    margin: {l:60, r:60, t:60, b:90}
+    annotations: radarAxisTitleAnnotations(),
+    margin: {l:92, r:92, t:74, b:104}
   };
 
   Plotly.react('fig', [...modelTraces, ringTrace], layout, {responsive:true, displayModeBar:true});
@@ -450,13 +473,15 @@ function clearRadarPlot() {
   const layout = {
     title: 'Radar plot cleared',
     polar: {
+      domain: {x: [0.10, 0.90], y: [0.10, 0.90]},
       radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
                     gridcolor: '#e2e8f0', linecolor: '#cbd5e1' },
       angularaxis: { direction: 'counterclockwise', showline: true,
-                     linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
+                     showticklabels: false, linecolor: '#94a3b8', gridcolor: '#e2e8f0' }
     },
     legend: {orientation:'h', y:-0.12},
-    margin: {l:60, r:60, t:60, b:90}
+    annotations: radarAxisTitleAnnotations(),
+    margin: {l:92, r:92, t:74, b:104}
   };
   Plotly.react('fig', [], layout, {responsive:true, displayModeBar:true});
 }
