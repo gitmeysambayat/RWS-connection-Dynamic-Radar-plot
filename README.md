@@ -4,11 +4,11 @@
 
 ## Live GUI
 
-[Open the RWS dynamic radar plot](https://gitmeysambayat.github.io/RWS-connection-Dynamic-Radar-plot/)
+[Open the RWS dynamic radar plot](https://gitmeysambayat.github.io/RWS-PhD-Thesis-GUIs/database-guis/dynamic-radar-plot/)
 
 ## Purpose
 
-This Chapter 4 companion GUI compares RWS connection cases using a radar plot with fixed global metric ranges. The embedded app data defines the plotted spokes as PEEQ at the column face, von Mises stress at the column face, cumulative energy, degradation, <i>&theta;</i>(0.6), and <i>M</i><sub>c</sub>.
+This complementary thesis GUI compares RWS connection cases using a radar plot with fixed global metric ranges. It supports design-oriented interrogation of the FE database and database-driven synthesis workflow. The embedded app data defines the plotted spokes as PEEQ at the column face, von Mises stress at the column face, cumulative energy, degradation, <i>&theta;</i>(0.6), and <i>M</i><sub>c</sub>.
 
 The filter panel supports profile, steel grade, top-N selection, primary normalised filters, and secondary filters. The CSV export button downloads the currently filtered dataset.
 

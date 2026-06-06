@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Chapter 4 companion GUI for dynamic radar comparison of normalised Reduced Web Section connection performance metrics.">
+  <meta name="description" content="Complementary thesis GUI for dynamic radar comparison of normalised Reduced Web Section connection performance metrics.">
   <meta name="theme-color" content="#f6f7fb">
   <title>RWS Connection Dynamic Radar Plot</title>
   <link rel="icon" type="image/png" href="favicon_3dmbc.png">
@@ -103,7 +103,7 @@
   <div class="headerRow">
     <div class="titleWrap">
       <div class="title" id="pageTitle">RWS connection dynamic radar plot</div>
-      <div class="metaLine" id="datasetSummary">Chapter 4 companion GUI for comparing normalised column-face demand, energy, degradation, <i>&theta;</i>(0.6), and <i>M</i><sub>c</sub>.</div>
+      <div class="metaLine" id="datasetSummary">Complementary thesis GUI for comparing normalised column-face demand, energy, degradation, <i>&theta;</i>(0.6), and <i>M</i><sub>c</sub>.</div>
     </div>
     <div class="brandBox" aria-label="Laboratory and institutional logos">
       <img class="labBrand" src="3DMBC_logo.png" alt="3DMBC logo">
@@ -123,11 +123,11 @@
     <select id="gradeSel"><option value="All">All</option></select>
   </div>
   <div>
-    <label>Span-to-depth:</label>
+    <label>Span-to-depth ratio:</label>
     <select id="s2dSel"><option value="All">All</option></select>
   </div>
   <div class="criteriaControl">
-    <label for="aiscCriteriaSel">Meet AISC 341-16 criteria (<i>M</i><sub>0.04</sub>/<i>M</i><sub>p</sub> &ge; 0.8)?</label>
+    <label for="aiscCriteriaSel">Meet AISC 341 criterion (<i>M</i><sub>0.04</sub> &ge; 0.8<i>M</i><sub>p</sub>)?</label>
     <select id="aiscCriteriaSel">
       <option value="Any">Doesn't matter</option>
       <option value="Yes">Yes</option>
@@ -340140,30 +340140,83 @@ function invNormOutward(radius, lo, hi, best_low) {
   return lo + radius*(hi - lo);
 }
 
+const M = (sub) => `<i>M</i><sub>${sub}</sub>`;
+const THETA = (sub) => `<i>θ</i><sub>${sub}</sub>`;
+const D_OVER_H = `<i>d</i><sub>o</sub>/<i>h</i>`;
+const S_OVER_H = `<i>S</i>/<i>h</i>`;
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (ch) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+
+const DISPLAY_LABELS = {
+  '(do/h)%': `${D_OVER_H} (%)`,
+  '(S/h)%': `${S_OVER_H} (%)`,
+  'θMy(FE)': `${THETA('y')} (FE)`,
+  'My(FE)': `${M('y')} (FE)`,
+  'θMy(FE)/θMy(FE)_FS': `${THETA('y')}/${THETA('y,FS')}`,
+  'My/My_FS': `${M('y')}/${M('y,FS')}`,
+  'θMc(FE)': `${THETA('m')} (FE)`,
+  'Mc(FE)': `${M('c')} (FE)`,
+  'θMc(FE)/θMc(FE)_FS': `${THETA('m')}/${THETA('m,FS')}`,
+  'Mc/Mc_FS': `${M('c')}/${M('c,FS')}`,
+  'θMu(FE)': `${THETA('u')} (FE)`,
+  'Mu(FE)_0.8Mc': `${M('u')} (FE) at 0.8${M('c')}`,
+  'M(06)': M('0.06'),
+  'M(06) /M(06)_FS': `${M('0.06')}/${M('0.06,FS')}`,
+  'EDissipated': 'Dissipated energy',
+  'EDissipated(normalised)': 'Dissipated energy (normalised)',
+  'Von Mises@CF': 'Normalised von Mises at column face',
+  'VonMises@CF': 'von Mises at column face',
+  'VonMises(normalised)': 'von Mises (normalised)',
+  'PEEQ@CF': 'PEEQ at column face',
+  'PEEQ(normalised)': 'PEEQ (normalised)',
+  'Energy': 'Dissipated energy (normalised)',
+  'Degradation': `Strength degradation, (${M('c')} - ${M('0.06')})/${M('c')}`,
+  'θ(0.6)': `${M('0.06')}/${M('0.06,FS')}`,
+  'Mc': `${M('c')}/${M('c,FS')}`,
+  'Mp(kN·m)': `${M('p')} (kN·m)`,
+  'Mp_RWS(kN·m)': `${M('p,RWS')} (kN·m)`,
+  'M0.04(kN·m)': `${M('0.04')} (kN·m)`,
+  '0.8Mp(kN·m)': `0.8${M('p')} (kN·m)`,
+  '0.8Mp_RWS(kN·m)': `0.8${M('p,RWS')} (kN·m)`,
+  'Margin_vs_0.8Mp': `${M('0.04')}/(0.8${M('p')})`,
+  'Margin_vs_0.8Mp_RWS/': `${M('0.04')}/(0.8${M('p,RWS')})`,
+  'QualPass_vs_Mp': `AISC 341 check: ${M('0.04')} ≥ 0.8${M('p')}`,
+  'QualPass_vs_Mp_RWS': `AISC 341 check: ${M('0.04')} ≥ 0.8${M('p,RWS')}`
+};
+
 const RADAR_AXIS_LABELS = {
   'PEEQ@CF': 'PEEQ at<br>column face',
   'Von Mises@CF': 'Normalised von Mises<br>at column face',
-  'Energy': 'Normalised<br>dissipated energy',
-  'Degradation': 'Strength degradation<br>at 0.06 rad',
-  'θ(0.6)': 'M<sub>0.06</sub>/M<sub>0.06,FS</sub>',
-  'Mc': 'M<sub>c</sub>/M<sub>c,FS</sub>'
+  'Energy': 'Dissipated energy<br>(normalised)',
+  'Degradation': `Strength degradation<br>(${M('c')} - ${M('0.06')})/${M('c')}`,
+  'θ(0.6)': `${M('0.06')}/${M('0.06,FS')}`,
+  'Mc': `${M('c')}/${M('c,FS')}`
 };
 
-const RADAR_HOVER_LABELS = {
-  'PEEQ@CF': 'PEEQ at column face',
-  'Von Mises@CF': 'Normalised von Mises at column face',
-  'Energy': 'Normalised dissipated energy',
-  'Degradation': 'Strength degradation at 0.06 rad, (Mc - M0.06) / Mc',
-  'θ(0.6)': 'M0.06 / M0.06,FS',
-  'Mc': 'Mc / Mc,FS'
-};
+function displayLabelHtml(label) {
+  return DISPLAY_LABELS[label] || escapeHtml(label);
+}
+
+function displayLabelText(label) {
+  const span = document.createElement('span');
+  span.innerHTML = displayLabelHtml(label).replace(/<br\s*\/?>/gi, ' ');
+  return span.textContent.replace(/\s+/g, ' ').trim();
+}
 
 function axisLabel(label) {
-  return RADAR_AXIS_LABELS[label] || label;
+  return RADAR_AXIS_LABELS[label] || displayLabelHtml(label);
 }
 
 function hoverLabel(label) {
-  return RADAR_HOVER_LABELS[label] || label;
+  return displayLabelHtml(label);
 }
 
 // Populate dropdowns
@@ -340178,7 +340231,7 @@ for (const p of DATA.profiles) { const o=document.createElement('option'); o.val
 for (const g of DATA.grades)   { const o=document.createElement('option'); o.value=g; o.textContent=g; gradeSel.appendChild(o); }
 for (const s of s2dValues)      { const o=document.createElement('option'); o.value=s; o.textContent=s; s2dSel.appendChild(o); }
 pageTitle.textContent = `RWS connection dynamic radar plot (${DATA.rows.length} models)`;
-datasetSummary.textContent = `Chapter 4 companion GUI covering ${DATA.rows.length} FE models; outward means better performance on the radar scale, and the live counter reports the filtered radar subset.`;
+datasetSummary.textContent = `Complementary thesis GUI covering ${DATA.rows.length} FE models; outward means better performance on the radar scale, and the live counter reports the filtered radar subset.`;
 
 // PRIMARY filters
 const primaryDiv = document.getElementById('primaryFilters');
@@ -340188,7 +340241,7 @@ for (const f of DATA.primary_numeric) {
   const card = document.createElement('div');
   card.className = 'ctrl';
   card.innerHTML = `
-    <h4>${f.col} <span class="small">(numeric)</span></h4>
+    <h4>${displayLabelHtml(f.col)} <span class="small">(numeric)</span></h4>
     <div class="numrow"><span class="small">LOW</span>
       <input id="num_lo_${sid}" type="number" step="any" value="${f.min}">
       <span class="small">HIGH</span>
@@ -340230,7 +340283,7 @@ for (const f of DATA.other_numeric) {
   const card = document.createElement('div');
   card.className = 'ctrl';
   card.innerHTML = `
-    <h4>${f.col} <span class="small">(numeric)</span></h4>
+    <h4>${displayLabelHtml(f.col)} <span class="small">(numeric)</span></h4>
     <div class="numrow"><span class="small">LOW</span>
       <input id="num_lo_${sid}" type="number" step="any" value="${f.min}">
       <span class="small">HIGH</span>
@@ -340268,7 +340321,7 @@ for (const f of DATA.other_cats) {
   const card = document.createElement('div');
   card.className = 'ctrl';
   card.innerHTML = `
-    <h4>${f.col} <span class="small">(categorical)</span></h4>
+    <h4>${displayLabelHtml(f.col)} <span class="small">(categorical)</span></h4>
     <select id="sel_${sid}">${f.values.map(v=>`<option value="${v}">${v}</option>`).join('')}</select>
   `;
   moreDiv.appendChild(card);
@@ -340406,7 +340459,7 @@ function draw() {
         `Model: ${k.row.Model}<br>` +
         `Profile: ${k.row.Profile}<br>` +
         `Grade: ${k.row.Grade}<br>` +
-        `S-to-D: ${k.row.S2D}<br><br>` +
+        `Span-to-depth: ${k.row.S2D}<br><br>` +
         `%{text|join:<br>}` + `<br>` +
         `Area: ${k.area.toFixed(3)}<extra></extra>`
     };
@@ -340424,7 +340477,7 @@ function draw() {
   };
 
   const layout = {
-    title: `Radar grading, outward = better (Profile=${prof}, Grade=${grad}, S/d=${s2d}, N=${topN})`,
+    title: `Radar grading, outward = better (profile=${prof}, grade=${grad}, span-to-depth=${s2d}, N=${topN})`,
     polar: {
       domain: {x: [0.07, 0.93], y: [0.07, 0.93]},
       radialaxis: { range: [0,1], showticklabels: false, ticks: '', gridshape: 'linear',
@@ -340460,14 +340513,15 @@ function clearRadarPlot() {
 // CSV download: summary -> blank -> full original row; UTF-8 BOM
 function downloadCSV(filtered) {
   if (!filtered || filtered.length === 0) { alert("No filtered models to download."); return; }
-  const summaryHeader = ["Model", "Profile", "Grade", "S-to-D", "Area", ...DATA.metrics.map(m => m.label)];
+  const metricHeaders = DATA.metrics.map(m => displayLabelText(m.label));
+  const summaryHeader = ["Model", "Profile", "Grade", "Span-to-depth", "Area", ...metricHeaders];
   const fileHeaders = DATA.all_headers.slice();
   const header = [...summaryHeader, "", ...fileHeaders];
   const rows = filtered.map(k => {
     const r = k.row, rec = {};
-    rec["Model"] = r.Model; rec["Profile"] = r.Profile; rec["Grade"] = r.Grade; rec["S-to-D"] = r.S2D;
+    rec["Model"] = r.Model; rec["Profile"] = r.Profile; rec["Grade"] = r.Grade; rec["Span-to-depth"] = r.S2D;
     rec["Area"]  = Number(k.area.toFixed(5));
-    for (const m of DATA.metrics) rec[m.label] = r[m.label];
+    DATA.metrics.forEach((m, i) => { rec[metricHeaders[i]] = r[m.label]; });
     rec[""] = "";
     for (const h of fileHeaders) rec[h] = (h in r) ? r[h] : "";
     return rec;
