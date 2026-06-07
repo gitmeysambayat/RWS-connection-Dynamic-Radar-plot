@@ -340125,6 +340125,13 @@ const DATA = {
   ]
 };
 const safeId = (s) => s.replace(/[^A-Za-z0-9_-]/g, "_");
+const sliderNumberFormat = {
+  to: (value) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? Number(number.toFixed(6)).toString() : String(value);
+  },
+  from: (value) => Number(value)
+};
 
 // 🔐 Password for CSV download (edit as needed)
 const DOWNLOAD_PASSWORD = "RWS2025";
@@ -340259,7 +340266,8 @@ for (const f of DATA.primary_numeric) {
     start: [f.min, f.max],
     connect: true,
     range: { min: f.min, max: f.max },
-    step: (f.max - f.min) / 200 || 0.0001
+    step: (f.max - f.min) / 200 || 0.0001,
+    format: sliderNumberFormat
   });
   slider.noUiSlider.on('update', (vals)=>{ loNum.value = vals[0]; hiNum.value = vals[1]; });
   slider.noUiSlider.on('change', draw);
@@ -340301,7 +340309,8 @@ for (const f of DATA.other_numeric) {
     start: [f.min, f.max],
     connect: true,
     range: { min: f.min, max: f.max },
-    step: (f.max - f.min) / 200 || 0.0001
+    step: (f.max - f.min) / 200 || 0.0001,
+    format: sliderNumberFormat
   });
   slider.noUiSlider.on('update', (vals)=>{ loNum.value = vals[0]; hiNum.value = vals[1]; });
   slider.noUiSlider.on('change', draw);
