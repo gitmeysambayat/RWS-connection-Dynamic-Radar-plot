@@ -340195,8 +340195,7 @@ const DISPLAY_LABELS = {
   '0.8Mp_RWS(kN·m)': `0.8${M('p,RWS')} (kN·m)`,
   'Margin_vs_0.8Mp': `${M('0.04')}/(0.8${M('p')})`,
   'Margin_vs_0.8Mp_RWS/': `${M('0.04')}/(0.8${M('p,RWS')})`,
-  'QualPass_vs_Mp': `AISC 341 check: ${M('0.04')} ≥ 0.8${M('p')}`,
-  'QualPass_vs_Mp_RWS': `AISC 341 check: ${M('0.04')} ≥ 0.8${M('p,RWS')}`
+  'QualPass_vs_Mp': `AISC 341 check: ${M('0.04')} ≥ 0.8${M('p')}`
 };
 
 const RADAR_AXIS_LABELS = {
@@ -340325,7 +340324,7 @@ for (const f of DATA.other_numeric) {
   moreNumeric[f.col] = { slider, loNum, hiNum };
 }
 for (const f of DATA.other_cats) {
-  if (f.col === 'QualPass_vs_Mp') continue;
+  if (f.col === 'QualPass_vs_Mp' || f.col === 'QualPass_vs_Mp_RWS') continue;
   const sid = safeId(f.col);
   const card = document.createElement('div');
   card.className = 'ctrl';
